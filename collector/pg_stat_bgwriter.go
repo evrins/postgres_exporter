@@ -101,19 +101,19 @@ var (
 		prometheus.Labels{},
 	)
 
-	statBGWriterQuery = `SELECT
-		checkpoints_timed
-		,checkpoints_req
-		,checkpoint_write_time
-		,checkpoint_sync_time
-		,buffers_checkpoint
-		,buffers_clean
-		,maxwritten_clean
-		,buffers_backend
-		,buffers_backend_fsync
-		,buffers_alloc
-		,stats_reset
-	FROM pg_stat_bgwriter;`
+	statBGWriterQuery = `select
+		c.num_timed as checkpoints_timed,
+		c.num_requested as checkpoints_req,
+		c.write_time as checkpoint_write_time,
+		c.sync_time as checkpoint_sync_time,
+		c.buffers_written as buffers_checkpoint,
+		b.buffers_clean,
+		b.maxwritten_clean,
+		0,
+		0,
+		b.buffers_alloc,
+		b.stats_reset
+	from pg_stat_bgwriter b, pg_stat_checkpointer c;`
 )
 
 func (PGStatBGWriterCollector) Update(ctx context.Context, instance *instance, ch chan<- prometheus.Metric) error {
